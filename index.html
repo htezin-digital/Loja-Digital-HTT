@@ -13,6 +13,10 @@
 body {
     background: #000000;
     color: white;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
 }
 
 .header {
@@ -95,11 +99,35 @@ body {
     box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
     transition: all 0.3s ease;
     border: 1px solid #4CAF50;
+    position: relative;
+    overflow: hidden;
+}
+
+.platform-card::before {
+    content: '';
+    position: absolute;
+    top: -150%;
+    left: -150%;
+    width: 400%;
+    height: 400%;
+    background: conic-gradient(transparent, rgba(76, 175, 80, 0.3), transparent);
+    animation: rotate 4s linear infinite;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.platform-card:hover::before {
+    opacity: 1;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }
 
 .platform-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 0 25px rgba(255, 255, 255, 0.2);
+    transform: translateY(-10px) scale(1.05);
+    box-shadow: 0 0 35px rgba(255, 255, 255, 0.3);
 }
 
 .platform-card svg {
@@ -259,6 +287,7 @@ body {
     font-weight: bold;
     margin: 0.5rem 0;
     text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    position: relative;
 }
 
 .carousel {
@@ -319,6 +348,84 @@ body {
     font-weight: bold;
     margin-bottom: 1rem;
 }
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: #1a1a1a;
+    padding: 2rem;
+    border-radius: 10px;
+    text-align: center;
+    max-width: 500px;
+    width: 90%;
+    border: 2px solid #4CAF50;
+    box-shadow: 0 0 20px rgba(76, 175, 80, 0.5);
+}
+
+.modal-content h2 {
+    color: #4CAF50;
+    text-shadow: 0 0 15px rgba(76, 175, 80, 0.7);
+    margin-bottom: 1.5rem;
+}
+
+.platform-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.platform-btn {
+    padding: 1rem;
+    border-radius: 5px;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.platform-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.kiwify-btn {
+    background: #1a1a1a;
+    color: #ccc;
+    border: 2px solid #4CAF50;
+    box-shadow: 0 0 15px rgba(76, 175, 80, 0.5);
+}
+
+.eduzz-btn {
+    background: white;
+    color: black;
+    border: 2px solid #FFD700;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+}
+
+.hotmart-btn {
+    background: pink;
+    color: #333;
+    border: 2px solid #ff0000;
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+}
+
+@keyframes buttonPop {
+    0% { transform: scale(0) rotate(0deg); }
+    50% { transform: scale(1.1) rotate(5deg); }
+    100% { transform: scale(1) rotate(0deg); }
+}
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
@@ -336,7 +443,7 @@ body {
             <p class="old-price">R$ 60,00</p>
             <p class="new-price">R$ 14,99</p>
             <p>Por tempo limitado!</p>
-            <a href="https://chk.eduzz.com/39YBQB54WO" class="btn-comprar">QUERO APROVEITAR AGORA!</a>
+            <a href="#" class="btn-comprar">QUERO APROVEITAR AGORA!</a>
         </div>
 
         <div class="platforms">
@@ -472,17 +579,35 @@ body {
         </div>
     </div>
 
+    <div id="platformModal" class="modal">
+        <div class="modal-content">
+            <h2>QUAL PLATAFORMA?</h2>
+            <div class="platform-buttons">
+                <button class="platform-btn kiwify-btn" disabled>Kiwify</button>
+                <button class="platform-btn eduzz-btn" onclick="window.location.href='https://chk.eduzz.com/39YBQB54WO'">Eduzz</button>
+                <button class="platform-btn hotmart-btn" disabled>HotMart</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // Carousel functionality
-        const carousel = document.querySelector('.carousel-inner');
-        const items = document.querySelectorAll('.carousel-item');
-        let currentIndex = 0;
+        const modal = document.getElementById('platformModal');
+        const buyButton = document.querySelector('.btn-comprar');
+        const platformButtons = document.querySelectorAll('.platform-btn');
 
-        function moveCarousel() {
-            currentIndex = (currentIndex + 1) % (items.length - 2);
-            carousel.style.transform = `translateX(-${currentIndex * (100/3)}%)`;
-        }
+        buyButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            modal.style.display = 'flex';
+            
+            platformButtons.forEach((btn, index) => {
+                btn.style.animation = `buttonPop 0.5s ease ${index * 0.2}s forwards`;
+            });
+        });
 
-        setInterval(moveCarousel, 3500);
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
     </script>
 </body></html>
